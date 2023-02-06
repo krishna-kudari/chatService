@@ -97,7 +97,7 @@ async function main() {
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-        const session = await getSession({ req });
+        const session = await getSession({ req });//added "const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));" to next-auth client util.js to work
 
         return { session: session as Session, pubsub };
       },

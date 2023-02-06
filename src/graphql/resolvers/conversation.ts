@@ -1,11 +1,10 @@
 import prisma from "../../lib/prismadb";
 import {
   ConversationPopulated,
-  createUsernameResponse,
   GraphQLContext,
 } from "../../util/types";
 import { GraphQLError } from "graphql";
-import { Conversation, Prisma, User } from "@prisma/client/index";
+import {Prisma } from '.prisma/client/index'
 import { withFilter } from "graphql-subscriptions";
 const resolvers = {
   Query: {
