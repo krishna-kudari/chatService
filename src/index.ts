@@ -20,7 +20,7 @@ async function main() {
   if (!(globalThis as any).fetch) {
     // @ts-ignore
     var fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-    (globalThis as any).fetch = fetch || await import('node-fetch').then(m => m.default);
+    (globalThis as any).fetch = fetch //|| await import('node-fetch').then(m => m.default);
   }
   dotenv.config();
   const app = express();
