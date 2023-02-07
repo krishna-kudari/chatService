@@ -156,12 +156,13 @@ const resolvers = {
          * Subscribe events for participants of the conversation
          */
         pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
-        // pubsub.publish("CONVERSATION_UPDATED", {
-        //   conversationUpdated: {
-        //     conversation,
-        //   },
-        // });
         console.log("MESSAGE SENT EVENT⚡⚡");
+        pubsub.publish("CONVERSATION_UPDATED", {
+          conversationUpdated: {
+            conversation,
+          },
+        });
+        console.log("CONVERSATION_UPDATED EVENT ⚡⚡");
         
       } catch (error: any) {
         console.log("SEND_MESSAGE ERROR: ", error);

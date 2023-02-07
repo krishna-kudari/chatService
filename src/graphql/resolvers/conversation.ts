@@ -1,8 +1,13 @@
 import prisma from "../../lib/prismadb";
-import { ConversationPopulated, GraphQLContext } from "../../util/types";
+import {
+  ConversationPopulated,
+  ConversationUpdatedSubscriptionPayload,
+  GraphQLContext,
+} from "../../util/types";
 import { GraphQLError } from "graphql";
 import { Prisma } from ".prisma/client/index";
 import { withFilter } from "graphql-subscriptions";
+import { userIsConversationParticipant } from "../../util/functions";
 const resolvers = {
   Query: {
     conversations: async (
@@ -110,7 +115,7 @@ const resolvers = {
          * Should always exista but being safe
          */
 
-        if(!participant){
+        if (!participant) {
           throw new Error("Participant entity not found");
         }
 
@@ -145,14 +150,55 @@ const resolvers = {
           console.log("PAyLOAD:", payload);
           const { session } = context;
 
+          console.log("HERE IS UPDATE CONVERSATION PAYLOAD📦📦",payload);
+          
+          if (!session?.user) {
+            throw new Error("Not authorized");
+          }
+
           const {
             conversationCreated: { participants },
           } = payload;
 
-          const userIsParticipnat = !!participants.find(
-            (p) => p.userId === session?.user?.id
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            session.user.id
           );
-          return userIsParticipnat;
+
+          return userIsParticipant;
+        }
+      ),
+    },
+    conversationUpdated: {
+      subscribe: withFilter(
+        (_: any, __: any, context: GraphQLContext) => {
+          const { session, pubsub } = context;
+          return pubsub.asyncIterator(["CONVERSATION_UPDATED"]);
+        },
+        (
+          payload: ConversationUpdatedSubscriptionPayload,
+          _: any,
+          context: GraphQLContext
+        ) => {
+          console.log("PAyLOAD:", payload);
+          const { session } = context;
+
+          if (!session?.user) {
+            throw new Error("Not authorized");
+          }
+
+          const {
+            conversationUpdated: {
+              conversation: { participants },
+            },
+          } = payload;
+
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            session.user.id
+          );
+
+          return userIsParticipant;
         }
       ),
     },
