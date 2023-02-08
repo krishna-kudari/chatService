@@ -2,12 +2,14 @@ import prisma from "../../lib/prismadb";
 import {
   ConversationPopulated,
   ConversationUpdatedSubscriptionPayload,
+  ConversationDeletedSubscriptionPayload,
   GraphQLContext,
 } from "../../util/types";
 import { GraphQLError } from "graphql";
 import { Prisma } from ".prisma/client/index";
 import { withFilter } from "graphql-subscriptions";
 import { userIsConversationParticipant } from "../../util/functions";
+
 const resolvers = {
   Query: {
     conversations: async (
@@ -112,7 +114,7 @@ const resolvers = {
           },
         });
         /**
-         * Should always exista but being safe
+         * Should always exists but being safe
          */
 
         if (!participant) {
@@ -133,6 +135,53 @@ const resolvers = {
       }
       return true;
     },
+
+    deleteConversation: async (
+      _: any,
+      args: { conversationId: string },
+      context: GraphQLContext
+    ): Promise<boolean> => {
+      const { session, pubsub } = context;
+      const { conversationId } = args;
+
+      if (!session?.user) {
+        throw new Error("Not Authorized");
+      }
+
+      try {
+        /**
+         * Delete conversation adnd all related documents
+         */
+        const [deletedConversation] = await prisma.$transaction([
+          prisma.conversation.delete({
+            where: {
+              id: conversationId,
+            },
+            include: conversationPopulated,
+          }),
+          prisma.conversationParticipant.deleteMany({
+            where: {
+              conversationId,
+            },
+          }),
+          prisma.message.deleteMany({
+            where: {
+              conversationId,
+            },
+          }),
+        ]);
+
+        pubsub.publish("CONVERSATION_DELETED", {
+          conversationDeleted: deletedConversation,
+        });
+        console.log("CONVERSATION_DELETED EVENT ⚡🚮⚡");
+      } catch (error: any) {
+        console.log("DELETECONVERSATION ERROR:🚮🗑️", error);
+        throw new GraphQLError(error.message);
+      }
+
+      return true;
+    },
   },
 
   Subscription: {
@@ -150,8 +199,8 @@ const resolvers = {
           console.log("PAyLOAD:", payload);
           const { session } = context;
 
-          console.log("HERE IS UPDATE CONVERSATION PAYLOAD📦📦",payload);
-          
+          console.log("HERE IS UPDATE CONVERSATION PAYLOAD📦📦", payload);
+
           if (!session?.user) {
             throw new Error("Not authorized");
           }
@@ -169,6 +218,7 @@ const resolvers = {
         }
       ),
     },
+
     conversationUpdated: {
       subscribe: withFilter(
         (_: any, __: any, context: GraphQLContext) => {
@@ -202,6 +252,33 @@ const resolvers = {
         }
       ),
     },
+
+    conversationDeleted: {
+      subscribe: withFilter(
+        (_: any, __: any, context: GraphQLContext) => {
+          const { session, pubsub } = context;
+          return pubsub.asyncIterator(["CONVERSATION_DELETED"]);
+        },
+        (
+          payload: ConversationDeletedSubscriptionPayload,
+          _: any,
+          context: GraphQLContext
+        ) => {
+          console.log("PAyLOAD:", payload);
+          const { session } = context;
+
+          if (!session?.user) {
+            throw new Error("Not authorized");
+          }
+          
+          const {
+            conversationDeleted: {participants},
+          } = payload;
+
+          return userIsConversationParticipant(participants, session.user.id);
+        }
+      ),
+    }
   },
 };
 
