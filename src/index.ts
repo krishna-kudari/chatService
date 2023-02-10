@@ -102,8 +102,23 @@ async function main() {
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-        const session = await getSession({ req });//added "const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));" to next-auth client util.js to work
-
+        console.log("REQ :",req.headers.cookie);
+        // const response = await fetch(`${req.headers.origin}/api/session`);
+        const session = await getSession({ req });
+        // {
+        //   user: {
+        //     name: 'Krishna K',
+        //     email: 'krish.11.22.2000@gmail.com',
+        //     image: 'https://lh3.googleusercontent.com/a/AEdFTp5NHycfNi1i6FCYjaBMj53945kf5Q8ujGmNUn0=s96-c',     
+        //     id: '63e11f13492cd4618b2d613b',
+        //     username: 'Krishna1122',
+        //     emailVerified: null
+        //   },
+        //   expires: '2023-03-11T14:35:10.507Z'
+        // };//added "const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));" to next-auth client util.js to work
+        // const data = await response.json();
+       console.log("SESSION FROM CONTEXT", session);
+      //  const session = data;
         return { session: session as Session, pubsub };
       },
     })
