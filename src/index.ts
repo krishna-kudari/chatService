@@ -112,6 +112,9 @@ async function main() {
       },
     })
   );
+  app.get("/",(req, res)=>{
+    res.send("dhoom!!Ⓜ️❤️‍🔥😀👋😍⚡🤛🤜📦👁️")
+  })
   // await new Promise<void>((resolve) =>
   //   httpServer.listen({ port: 4000 }, resolve)
   // );
