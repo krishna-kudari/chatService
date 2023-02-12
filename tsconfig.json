@@ -11,5 +11,5 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
   },
-  "exclude":["node_modules/.prisma"]
+  "exclude":["node_modules"]
 }
