@@ -1,6 +1,5 @@
 import { Prisma } from "@prisma/client";
 import { PubSub } from "graphql-subscriptions";
-import { ISODateString } from "next-auth";
 import {
   conversationPopulated,
   participantPopulated,
@@ -9,6 +8,8 @@ import {
   messagePopulated
 } from "../graphql/resolvers/message";
 import { Context } from "graphql-ws/lib/server";
+
+export declare type ISODateString = string;
 
 export interface GraphQLContext {
   session: Session | null;

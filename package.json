@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
-    "build": "rimraf ./build && tsc",
     "start": "npm run build && node build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "npx prisma generate --schema=src/prisma/schema.prisma"
@@ -28,7 +27,6 @@
     "graphql-tag": "^2.12.6",
     "graphql-ws": "^5.11.3",
     "lodash.merge": "^4.6.2",
-    "next-auth": "^4.19.2",
     "node-fetch": "^2.6.1",
     "ts-node": "^10.9.1",
     "ws": "^8.12.0"
