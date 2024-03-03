@@ -2,8 +2,8 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index",
-  "types": "dist/index",
+  "main": "dist/index.js",
+  "typings": "src/index",
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
